@@ -19,7 +19,7 @@
     canvas {
       display: block;
       width: 100%;
-      height: 100%;
+      height: auto;
       margin-bottom: 1px;
     }
 
@@ -46,31 +46,11 @@
 <div id="canvas-container"></div>
 
 <div id="footer">
-  <a id="download" href="https://github.com/cocoquizon/fbcq1/899bbcb5d8a56b2d27dff58ca4852b396eefd14b/web-fbcq2.pdf" target="_blank">Download PDF</a>
+  <a id="download" href="https://raw.githubusercontent.com/cocoquizon/fbcq1/899bbcb5d8a56b2d27dff58ca4852b396eefd14b/web-fbcq2.pdf" target="_blank">Download PDF</a>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const url = 'https://github.com/cocoquizon/fbcq1/899bbcb5d8a56b2d27dff58ca4852b396eefd14b/web-fbcq2.pdf';
-  const container = document.getElementById('canvas-container');
-
-  pdfjsLib.getDocument(url).promise.then(pdf => {
-    for (let i = 1; i <= pdf.numPages; i++) {
-      pdf.getPage(i).then(page => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const scale = container.clientWidth / page.getViewport({ scale: 1 }).width;
-        const viewport = page.getViewport({ scale });
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        container.appendChild(canvas);
-        page.render({ canvasContext: ctx, viewport });
-      });
-    }
-  });
-</script>
-
-</body>
-</html>
+  const url = 'https://raw.githubusercontent.com/coc
