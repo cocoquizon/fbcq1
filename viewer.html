@@ -6,7 +6,7 @@
   <title>PDF Viewer</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #fff; font-family: sans-serif; }
+    body { background: #fff; font-family: sans-serif; overflow: hidden; }
 
     #controls {
       display: flex;
@@ -32,7 +32,6 @@
     }
 
     button:disabled { background: #ccc; cursor: default; }
-
     #page-info { font-size: 14px; color: #333; }
 
     #download {
@@ -46,15 +45,10 @@
 
     #canvas-container {
       width: 100%;
-      overflow: hidden;
       touch-action: pan-y;
     }
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
+    canvas { display: block; width: 100%; height: auto; }
   </style>
 </head>
 <body>
@@ -81,14 +75,26 @@
 
   const canvas = document.getElementById('pdf-canvas');
   const ctx = canvas.getContext('2d');
+  const controls = document.getElementById('controls');
+
+  function sendHeight() {
+    const totalHeight = canvas.offsetHeight + controls.offsetHeight;
+    window.parent.postMessage({ pdfHeight: totalHeight }, '*');
+  }
 
   function renderPage(num) {
     pdfDoc.getPage(num).then(page => {
-      const scale = canvas.parentElement.clientWidth / page.getViewport({ scale: 1 }).width;
+      const containerWidth = canvas.parentElement.clientWidth;
+      const scale = containerWidth / page.getViewport({ scale: 1 }).width;
       const viewport = page.getViewport({ scale });
+
       canvas.width = viewport.width;
       canvas.height = viewport.height;
-      page.render({ canvasContext: ctx, viewport });
+
+      page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+        sendHeight();
+      });
+
       document.getElementById('page-info').textContent = `Page ${num} of ${totalPages}`;
       document.getElementById('prev').disabled = num <= 1;
       document.getElementById('next').disabled = num >= totalPages;
@@ -115,6 +121,9 @@
     const diff = touchStartX - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
   });
+
+  // Re-send height on window resize
+  window.addEventListener('resize', () => renderPage(currentPage));
 </script>
 
 </body>
