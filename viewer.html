@@ -59,7 +59,7 @@
     <span id="page-info">Loading...</span>
     <button id="next" onclick="changePage(1)" disabled>Next →</button>
   </div>
-  <a id="download" href="https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf" target="_blank">↓ Download</a>
+  <a id="download" href="https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/optimized-fbcq2.pdf" target="_blank">↓ Download</a>
 </div>
 
 <div id="canvas-container">
@@ -70,7 +70,7 @@
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const url = 'https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf';
+  const url = 'https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/optimized-fbcq2.pdf';
   let pdfDoc = null, currentPage = 1, totalPages = 0;
 
   const canvas = document.getElementById('pdf-canvas');
