@@ -19,7 +19,7 @@
     canvas {
       display: block;
       width: 100%;
-      height: auto;
+      height: 100%;
       margin-bottom: 1px;
     }
 
@@ -53,7 +53,7 @@
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const url = 'https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf';
+  const url = 'https://github.com/cocoquizon/fbcq1/blob/899bbcb5d8a56b2d27dff58ca4852b396eefd14b/web-fbcq2.pdf';
   const container = document.getElementById('canvas-container');
 
   pdfjsLib.getDocument(url).promise.then(pdf => {
