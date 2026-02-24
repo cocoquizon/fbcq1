@@ -6,124 +6,70 @@
   <title>PDF Viewer</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #fff; font-family: sans-serif; overflow: hidden; }
 
-    #controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px;
+    body {
       background: #fff;
-      border-bottom: 1px solid #eee;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .nav { display: flex; align-items: center; gap: 10px; }
-
-    button {
-      padding: 8px 16px;
-      background: #1a1a1a;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    button:disabled { background: #ccc; cursor: default; }
-    #page-info { font-size: 14px; color: #333; }
-
-    #download {
-      padding: 8px 16px;
-      background: #f0f0f0;
-      color: #333;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 14px;
+      font-family: 'Times New Roman', Times, serif;
     }
 
     #canvas-container {
       width: 100%;
-      touch-action: pan-y;
     }
 
-    canvas { display: block; width: 100%; height: auto; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-bottom: 1px;
+    }
+
+    #footer {
+      padding: 24px 16px;
+      text-align: center;
+    }
+
+    #download {
+      display: inline-block;
+      padding: 12px 32px;
+      background: #000;
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
 
-<div id="controls">
-  <div class="nav">
-    <button id="prev" onclick="changePage(-1)" disabled>← Prev</button>
-    <span id="page-info">Loading...</span>
-    <button id="next" onclick="changePage(1)" disabled>Next →</button>
-  </div>
-  <a id="download" href="https://github.com/cocoquizon/fbcq1/blob/899bbcb5d8a56b2d27dff58ca4852b396eefd14b/web-fbcq2.pdf" target="_blank">↓ Download</a>
-</div>
+<div id="canvas-container"></div>
 
-<div id="canvas-container">
-  <canvas id="pdf-canvas"></canvas>
+<div id="footer">
+  <a id="download" href="https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf" target="_blank">Download PDF</a>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  const url = 'https://github.com/cocoquizon/fbcq1/blob/899bbcb5d8a56b2d27dff58ca4852b396eefd14b/web-fbcq2.pdf';
-  let pdfDoc = null, currentPage = 1, totalPages = 0;
-
-  const canvas = document.getElementById('pdf-canvas');
-  const ctx = canvas.getContext('2d');
-  const controls = document.getElementById('controls');
-
-  function sendHeight() {
-    const totalHeight = canvas.offsetHeight + controls.offsetHeight;
-    window.parent.postMessage({ pdfHeight: totalHeight }, '*');
-  }
-
-  function renderPage(num) {
-    pdfDoc.getPage(num).then(page => {
-      const containerWidth = canvas.parentElement.clientWidth;
-      const scale = containerWidth / page.getViewport({ scale: 1 }).width;
-      const viewport = page.getViewport({ scale });
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-        sendHeight();
-      });
-
-      document.getElementById('page-info').textContent = `Page ${num} of ${totalPages}`;
-      document.getElementById('prev').disabled = num <= 1;
-      document.getElementById('next').disabled = num >= totalPages;
-    });
-  }
-
-  function changePage(dir) {
-    const newPage = currentPage + dir;
-    if (newPage < 1 || newPage > totalPages) return;
-    currentPage = newPage;
-    renderPage(currentPage);
-  }
+  const url = 'https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf';
+  const container = document.getElementById('canvas-container');
 
   pdfjsLib.getDocument(url).promise.then(pdf => {
-    pdfDoc = pdf;
-    totalPages = pdf.numPages;
-    renderPage(currentPage);
+    for (let i = 1; i <= pdf.numPages; i++) {
+      pdf.getPage(i).then(page => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const scale = container.clientWidth / page.getViewport({ scale: 1 }).width;
+        const viewport = page.getViewport({ scale });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        container.appendChild(canvas);
+        page.render({ canvasContext: ctx, viewport });
+      });
+    }
   });
-
-  // Swipe support
-  let touchStartX = 0;
-  canvas.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
-  canvas.addEventListener('touchend', e => {
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
-  });
-
-  // Re-send height on window resize
-  window.addEventListener('resize', () => renderPage(currentPage));
 </script>
 
 </body>
