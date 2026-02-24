@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #fff; font-family: sans-serif; }
+
+    #controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .nav { display: flex; align-items: center; gap: 10px; }
+
+    button {
+      padding: 8px 16px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:disabled { background: #ccc; cursor: default; }
+
+    #page-info { font-size: 14px; color: #333; }
+
+    #download {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      color: #333;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    #canvas-container {
+      width: 100%;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+
+<div id="controls">
+  <div class="nav">
+    <button id="prev" onclick="changePage(-1)" disabled>← Prev</button>
+    <span id="page-info">Loading...</span>
+    <button id="next" onclick="changePage(1)" disabled>Next →</button>
+  </div>
+  <a id="download" href="https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf" target="_blank">↓ Download</a>
+</div>
+
+<div id="canvas-container">
+  <canvas id="pdf-canvas"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const url = 'https://raw.githubusercontent.com/cocoquizon/fbcq1/c5f21af97f8a1651a6b552bc47bbfd04ddace388/Q3-compressed.pdf';
+  let pdfDoc = null, currentPage = 1, totalPages = 0;
+
+  const canvas = document.getElementById('pdf-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function renderPage(num) {
+    pdfDoc.getPage(num).then(page => {
+      const scale = canvas.parentElement.clientWidth / page.getViewport({ scale: 1 }).width;
+      const viewport = page.getViewport({ scale });
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      page.render({ canvasContext: ctx, viewport });
+      document.getElementById('page-info').textContent = `Page ${num} of ${totalPages}`;
+      document.getElementById('prev').disabled = num <= 1;
+      document.getElementById('next').disabled = num >= totalPages;
+    });
+  }
+
+  function changePage(dir) {
+    const newPage = currentPage + dir;
+    if (newPage < 1 || newPage > totalPages) return;
+    currentPage = newPage;
+    renderPage(currentPage);
+  }
+
+  pdfjsLib.getDocument(url).promise.then(pdf => {
+    pdfDoc = pdf;
+    totalPages = pdf.numPages;
+    renderPage(currentPage);
+  });
+
+  // Swipe support
+  let touchStartX = 0;
+  canvas.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  canvas.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) changePage(diff > 0 ? 1 : -1);
+  });
+</script>
+
+</body>
+</html>
